@@ -1,0 +1,9 @@
+# Output files
+*.pdf
+*.png
+*.midi
+*.svg
+
+# OS
+.DS_Store
+Thumbs.db
