@@ -74,7 +74,8 @@ REMOTE_SETUP
 # 2. Send source files (entire directory)
 # ---------------------------------------------------------------------------
 echo "[lilypond] Sending files..."
-tar -c -C "$dir" . | ssh "$server" "docker exec -i $cname tar x -C /scores"
+tar -c -C "$dir" --exclude='*.pdf' --exclude='*.png' --exclude='*.midi' --exclude='*.svg' . \
+  | ssh "$server" "docker exec -i $cname tar x -C /scores"
 
 # ---------------------------------------------------------------------------
 # 3. Run LilyPond
@@ -95,7 +96,6 @@ ssh "$server" "docker exec $cname sh -c '
 # ---------------------------------------------------------------------------
 # 5. Stop container (keep it for next run)
 # ---------------------------------------------------------------------------
-ssh "$server" "docker stop $cname >/dev/null" &
-disown
+ssh "$server" "docker stop -t 2 $cname >/dev/null"
 
 echo "[lilypond] Done → $(ls "$dir"/"${base%.ly}".{pdf,png,svg,midi} 2>/dev/null | tr '\n' ' ')"
