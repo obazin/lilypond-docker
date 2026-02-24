@@ -33,7 +33,7 @@ fi
 
 args=("$@")
 file="${args[-1]}"
-flags=("${args[@]:0:$(( ${#args[@]} - 1 ))}")
+flags=("${args[@]:0:$((${#args[@]} - 1))}")
 
 if [ ! -f "$file" ]; then
   echo "Error: file not found: $file" >&2
@@ -66,16 +66,17 @@ ssh "$server" bash -s -- "$cname" <<'REMOTE_SETUP'
     docker start "$cname" >/dev/null
   fi
 
-  # Clean working directory from previous runs
-  docker exec "$cname" sh -c 'rm -rf /scores/*'
+  # Clean working directory from previous runs (including dotfiles)
+  docker exec "$cname" sh -c 'find /scores -mindepth 1 -delete'
+  echo "[lilypond] Output folder cleaned."
 REMOTE_SETUP
 
 # ---------------------------------------------------------------------------
 # 2. Send source files (entire directory)
 # ---------------------------------------------------------------------------
 echo "[lilypond] Sending files..."
-tar -c -C "$dir" --exclude='*.pdf' --exclude='*.png' --exclude='*.midi' --exclude='*.svg' . \
-  | ssh "$server" "docker exec -i $cname tar x -C /scores"
+tar -c -C "$dir" --exclude='*.pdf' --exclude='*.png' --exclude='*.midi' --exclude='*.svg' . |
+  ssh "$server" "docker exec -i $cname tar x -C /scores"
 
 # ---------------------------------------------------------------------------
 # 3. Run LilyPond
